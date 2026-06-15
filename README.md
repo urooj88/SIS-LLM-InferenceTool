@@ -1,12 +1,8 @@
 # SIS-LLM: LLM Inference Sustainability on CPU+GPU Deployments
 
-> **CPU Version** — Evaluates LLM inference sustainability on CPU-only hardware using the Sustainability Index Score (SIS) framework.
-
-**Developed by Urooj Asgher**
-Technological University Dublin, Ireland
+**Developed by Urooj Asgher** 
+Technological University Dublin, Ireland 
 ORCID: 0000-0001-9218-3307
-
----
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -18,32 +14,19 @@ ORCID: 0000-0001-9218-3307
 
 ## Overview
 
-**SIS-LLM** is a unified framework for evaluating the sustainability of Large Language Model (LLM) inference. It integrates performance, efficiency, and environmental metrics into a single interpretable score, the **Sustainability Index Score (SIS)**.
+**SIS-LLM** is a unified framework for evaluating the sustainability of LLM inference. It combines performance, efficiency, and environmental metrics into a single score — the **Sustainability Index Score (SIS)**.
 
-This repository contains the **CPU version** of the SIS-LLM pipeline, evaluated on an HPC server using CPU-only execution with physical power metering via an external **Adcewatt** power meter connected via serial port.
+> This is the **CPU version**, evaluated on an HPC server using CPU-only execution with physical power metering via an **Adcewatt** power meter.
 
-### What SIS Measures
+---
 
-| Metric | Unit | Goal |
-|---|---|---|
-| Energy Consumption | Joules/Query | Lower is better |
-| Carbon Emissions | gCO₂eq/Query | Lower is better |
-| Model Efficiency | Accuracy ÷ Energy | Higher is better |
-| Execution Time | Seconds/Query | Lower is better |
-| Memory Usage | GB | Lower is better |
-| Throughput | Tokens/sec | Higher is better |
-| Token Energy Efficiency | Tokens/J | Higher is better |
-| Hardware Efficiency | Accuracy ÷ CPU-hours | Higher is better |
-| FLOPs | Per inference | Lower is better |
-| Model Size | MB | Smaller is better |
-
-### SIS Classification
+## SIS Classification
 
 | SIS Score | Sustainability Level |
 |---|---|
-| 0.0 – 0.3 |  Low Impact |
-| 0.3 – 0.7 |  Medium Impact |
-| 0.7 – 1.0 |  High Impact |
+| 0.0 – 0.3 | 🟢 Low Impact |
+| 0.3 – 0.7 | 🟡 Medium Impact |
+| 0.7 – 1.0 | 🔴 High Impact |
 
 ---
 
@@ -56,19 +39,17 @@ This repository contains the **CPU version** of the SIS-LLM pipeline, evaluated 
 | Meta-Llama-3.1-8B-Instruct | 8B | GGUF Q4\_K\_M |
 | Phi-3.5-mini-Instruct | 3.8B | GGUF Q4\_K\_M |
 
-All models are deployed using [`llama.cpp`](https://github.com/ggerganov/llama.cpp) with GGUF Q4\_K\_M quantisation.
-
 ---
 
 ## Benchmarks
 
-| Dataset | Task Type | Samples |
+| Dataset | Task | Samples |
 |---|---|---|
 | GSM8K | Mathematical Reasoning | 500 |
 | MMLU | Multi-domain MCQ | 500 |
 | TruthfulQA | Factual Truthfulness | 500 |
 
-**Total: 1500 prompts per model run** (fixed seed = 42)
+**Total: 1500 prompts per model** (fixed seed = 42)
 
 ---
 
@@ -76,280 +57,85 @@ All models are deployed using [`llama.cpp`](https://github.com/ggerganov/llama.c
 
 ```
 SIS-LLM/
-│
 ├── README.md
 ├── requirements.txt
-│
 ├── main_sustainability_runner_LLM_CPU.py    ← Main entry point
-├── build_eval_dataset.py                    ← Dataset builder (GSM8K + MMLU + TruthfulQA)
-├── run_omegawatt_log_both_models12_same.sh  ← Orchestration: runs all 4 models in sequence
-├── run_screen_job_v1.sh                     ← HPC job runner with logging (version 1)
-├── run_screen_job_v2.sh                     ← HPC job runner with logging (version 2)
-│
+├── build_eval_dataset.py                    ← Builds evaluation dataset
+├── run_omegawatt_log_both_models12_same.sh  ← Runs all 4 models with power logging
+├── run_screen_job_v1.sh                     ← HPC job runner with logging
 ├── omegawatt_scripts/
-│   ├── run_omegawatt_log_models12.py        ← Per-model power logger (Adcewatt + psutil)
-│   └── run_basepower_adcewatt_var_std.py    ← Baseline power measurement (12 iterations × 5s)
-│
-├── test_models/
-│   ├── collect_inference_metrics.py         ← Reads saved outputs, computes accuracy + FLOPs
-│   ├── model1.sh                            ← Qwen2.5 llama.cpp run script
-│   ├── model2.sh                            ← Mistral llama.cpp run script
-│   ├── model3.sh                            ← LLaMA llama.cpp run script
-│   └── model4.sh                            ← Phi-mini llama.cpp run script
-│
-└── model_logs/                              ← Auto-created at runtime (do not commit)
-    ├── baseline_value.txt                   ← Cached baseline power in Watts
-    ├── mxm_power.csv                        ← Raw Adcewatt meter readings during model runs
-    ├── Adcewatt-output.csv                  ← Raw Adcewatt readings during baseline
-    ├── power_out.txt                        ← Parsed baseline result (Average Power W)
-    ├── model1_samples.csv                   ← CPU% + memory samples for Model 1
-    ├── model2_samples.csv                   ← CPU% + memory samples for Model 2
-    ├── model3_samples.csv                   ← CPU% + memory samples for Model 3
-    ├── model4_samples.csv                   ← CPU% + memory samples for Model 4
-    ├── sustainability_detailed_report.txt   ← Final per-model SIS text report
-    └── updated_sustainability_metrics.xlsx  ← Full metrics table with colour highlights
+│   ├── run_omegawatt_log_models12.py        ← Per-model power logger
+│   └── run_basepower_adcewatt_var_std.py    ← Baseline power measurement
+└── test_models/
+    ├── collect_inference_metrics.py         ← Computes accuracy and metrics
+    ├── model1.sh                            ← Qwen2.5
+    ├── model2.sh                            ← Mistral
+    ├── model3.sh                            ← LLaMA
+    └── model4.sh                            ← Phi-mini
 ```
-
-> `model_metrices.csv` is auto-generated in the **root directory** by `run_omegawatt_log_models12.py` after each model run.
-
-> `test_models/prompts.txt` and `test_models/answers.csv` are auto-generated by `build_eval_dataset.py`. Do not commit them.
-
----
-
-## Hardware Requirements
-
-### Required
-- CPU server with sufficient RAM to load GGUF Q4\_K\_M models (~5–6 GB per model)
-- **Adcewatt external power meter** connected via `/dev/ttyUSB0`
-- **Adcewatt binary** (`wattmetre-readmv2new`) installed on the system
-- **llama.cpp** built and available on the system
-
-### Tested On
-- 2× Intel Xeon Gold 6430 (64 cores, 128 threads)
-- GPU disabled via `CUDA_VISIBLE_DEVICES=""`
-
->  The Adcewatt meter (`/dev/ttyUSB0`) and binary (`wattmetre-readmv2new`) are required for energy measurements. The meter reads two active power channels: `#activepow8` and `#activepow9`. Without physical hardware, you must supply `model_metrices.csv` manually with the required columns.
 
 ---
 
 ## Installation
 
-### 1. Clone the repository
-
 ```bash
-git clone https://github.com/your-username/SIS-LLM.git
-cd SIS-LLM
-```
-
-### 2. Install Python dependencies
-
-```bash
+git clone https://github.com/urooj88/SIS-LLM-InferenceTool.git
+cd SIS-LLM-InferenceTool
 pip install -r requirements.txt
 ```
 
-### 3. Install llama.cpp
-
-Follow the official [llama.cpp build instructions](https://github.com/ggerganov/llama.cpp) for your platform.
-
-### 4. Download GGUF models
-
-Download the Q4\_K\_M GGUF variants of each model from HuggingFace:
+Also install [`llama.cpp`](https://github.com/ggerganov/llama.cpp) and download GGUF Q4\_K\_M models from HuggingFace:
 
 | Model | HuggingFace |
 |---|---|
-| Qwen2.5-7B-Instruct | [Qwen/Qwen2.5-7B-Instruct-GGUF](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-GGUF) |
-| Mistral-7B-Instruct-v0.3 | [mistralai/Mistral-7B-Instruct-v0.3-GGUF](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3-GGUF) |
-| Meta-Llama-3.1-8B-Instruct | [bartowski/Meta-Llama-3.1-8B-Instruct-GGUF](https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-GGUF) |
-| Phi-3.5-mini-Instruct | [bartowski/Phi-3.5-mini-instruct-GGUF](https://huggingface.co/bartowski/Phi-3.5-mini-instruct-GGUF) |
+| Qwen2.5-7B | [Link](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct-GGUF) |
+| Mistral-7B | [Link](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3-GGUF) |
+| LLaMA-3.1-8B | [Link](https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-GGUF) |
+| Phi-3.5-mini | [Link](https://huggingface.co/bartowski/Phi-3.5-mini-instruct-GGUF) |
 
-Update the `MODEL` and `LLAMA_CLI` paths inside each `test_models/model*.sh` to point to your local files.
+Update `MODEL` and `LLAMA_CLI` paths in each `test_models/model*.sh`.
 
 ---
 
 ## Usage
 
-### Step 1 — Build the evaluation dataset (first time only)
-
+### Step 1 — Build dataset (first time only)
 ```bash
 python3 build_eval_dataset.py --reason 500 --mcq 500 --truth 500 --force-rebuild
 ```
 
-This downloads GSM8K, MMLU, and TruthfulQA from HuggingFace and writes:
-- `test_models/prompts.txt` — 1500 shuffled prompts
-- `test_models/answers.csv` — ground truth answers with type and dataset labels
-
-Use `--force-rebuild` only when you want to regenerate the dataset. On all subsequent runs it is reused automatically.
-
-### Step 2 — Run the full SIS pipeline
-
+### Step 2 — Run the full pipeline
 ```bash
 python3 main_sustainability_runner_LLM_CPU.py
 ```
 
-This runs the following steps automatically:
-
-| Step | Script called | What it does |
-|---|---|---|
-| 0 | `build_eval_dataset.py` | Checks for or builds dataset |
-| 1 | `run_omegawatt_log_both_models12_same.sh` | Runs all 4 models sequentially with 20s cooldown; logs power via Adcewatt meter |
-| 2 | `collect_inference_metrics.py` | Reads saved model outputs; computes accuracy per dataset and task type |
-| 3 | `main_sustainability_runner_LLM_CPU.py` | Merges CSVs, normalises metrics, computes SIS, prints terminal tables |
-| 4 | — | Saves report and Excel to `model_logs/` |
-
-### Step 3 — Run on HPC with logging (optional)
-
-```bash
-bash run_screen_job_v1.sh
+### Step 3 — View results
 ```
-
-This wraps the full pipeline in a timestamped log file and optionally sends an email notification when the job finishes.
-
-### Step 4 — View results
-
-```
-model_logs/sustainability_detailed_report.txt   ← Per-model detailed metrics text report
-model_logs/updated_sustainability_metrics.xlsx  ← Full metrics table with green highlights
-```
-
----
-
-## Pipeline Flow
-
-```
-build_eval_dataset.py
-        │
-        ▼
-test_models/prompts.txt + answers.csv
-        │
-        ▼
-run_omegawatt_log_both_models12_same.sh
-  └── omegawatt_scripts/run_omegawatt_log_models12.py  (×4, --app-type serial|parallel|third|fourth)
-        ├── run_basepower_adcewatt_var_std.py → baseline_value.txt
-        ├── Adcewatt meter (/dev/ttyUSB0)    → mxm_power.csv
-        ├── psutil monitor                    → model*_samples.csv
-        └── test_models/model*.sh             → outputs_model*.txt
-                                                model*_total_output_tokens.txt
-                                                model*_avg_output_tokens.txt
-        │
-        ▼
-model_metrices.csv
-(energy J, power W, execution time s, CPU hours, memory GiB per model)
-        │
-        ▼
-test_models/collect_inference_metrics.py
-  └── reads outputs_model*.txt + answers.csv
-  └── computes accuracy, FLOPs, token counts
-        │
-        ▼
-test_models/model_inference_data.csv
-        │
-        ▼
-main_sustainability_runner_LLM_CPU.py
-  └── merges model_metrices.csv + model_inference_data.csv
-  └── normalises 9 metrics → computes SIS score
-        │
-        ▼
 model_logs/sustainability_detailed_report.txt
 model_logs/updated_sustainability_metrics.xlsx
 ```
 
 ---
 
-## Power Measurement Details
+## Hardware Requirements
 
-Energy is measured using an **Adcewatt external power meter** via `/dev/ttyUSB0`, reading channels `#activepow8` and `#activepow9`.
+- CPU server (~5–6 GB RAM per model)
+- Adcewatt power meter via `/dev/ttyUSB0`
+- Adcewatt binary (`wattmetre-readmv2new`)
+- llama.cpp
 
-**Baseline power** is measured once before all model runs using `run_basepower_adcewatt_var_std.py`:
-- Runs **12 iterations × 5 seconds** of idle power measurement
-- Averages across all successful iterations
-- Cached in `model_logs/baseline_value.txt` and reused on subsequent runs
-
-**Dynamic energy** per model is computed as:
-
-```
-Dynamic Power  = Average Total Power (during run) − Baseline Power (idle)
-Dynamic Energy = Dynamic Power × Total Execution Time (seconds)
-```
-
-**Carbon emissions** per query:
-
-```
-CO₂ (gCO₂eq) = (Dynamic Energy in J ÷ 3,600,000) × Carbon Intensity (gCO₂/kWh)
-```
-
-Default carbon intensity: **300 gCO₂/kWh** — configurable in `collect_inference_metrics.py`.
-
-**CPU utilisation and memory** are sampled every ~2 seconds using `psutil` per model and saved to `model_logs/model*_samples.csv`.
-
----
-
-## SIS Formula
-
-```
-SIS = 1 − Σ (wᵢ × Normᵢ)        where wᵢ = 1/9 for all metrics
-```
-
-| # | Metric | Direction | Normalisation |
-|---|---|---|---|
-| 1 | Energy per Query | Lower is better | (x − min) / (max − min) |
-| 2 | CO₂ per Query | Lower is better | (x − min) / (max − min) |
-| 3 | Runtime per Query | Lower is better | (x − min) / (max − min) |
-| 4 | Memory Usage | Lower is better | (x − min) / (max − min) |
-| 5 | FLOPs | Lower is better | (x − min) / (max − min) |
-| 6 | Model Size | Lower is better | (x − min) / (max − min) |
-| 7 | Accuracy | Higher is better | 1 − (x − min) / (max − min) |
-| 8 | Throughput | Higher is better | 1 − (x − min) / (max − min) |
-| 9 | Token Energy Efficiency | Higher is better | 1 − (x − min) / (max − min) |
-
-**Lower SIS = better sustainability.**
-
----
-
-## Configuration
-
-| Parameter | File | Variable / Flag | Default |
-|---|---|---|---|
-| Carbon intensity | `collect_inference_metrics.py` | `CARBON_INTENSITY` | 300 gCO₂/kWh |
-| Random seed | `build_eval_dataset.py` | `RANDOM_SEED` | 42 |
-| Prompts per dataset | CLI args to `build_eval_dataset.py` | `--reason --mcq --truth` | 500 each |
-| Power meter port | `run_omegawatt_log_models12.py` | hardcoded | `/dev/ttyUSB0` |
-| Baseline iterations | `run_basepower_adcewatt_var_std.py` | `--repetitions` | 12 |
-| Baseline duration | `run_basepower_adcewatt_var_std.py` | `--measurement-time` | 5 seconds |
-| Cooldown between models | `run_omegawatt_log_both_models12_same.sh` | `sleep` | 20 seconds |
-| Model paths | `test_models/model*.sh` | `MODEL=` | Update before running |
-
----
-
-## `model_metrices.csv` — Required Columns
-
-This file is auto-generated by `run_omegawatt_log_models12.py`. If supplying it manually (e.g. without a physical power meter), include these columns:
-
-| Column | Description |
-|---|---|
-| `Model_Name` | Model1 / Model2 / Model3 / Model4 |
-| `Baseline_Power_W` | Idle server power (W) |
-| `Total_Power_W` | Average total power during run (W) |
-| `Dynamic_Power_W` | Total minus baseline (W) |
-| `Total_Execution_Time_s` | Wall-clock runtime (seconds) |
-| `Total_Energy_J` | Total energy (J) |
-| `Dynamic_Energy_J` | Dynamic energy (J) |
-| `CPU_Use_%` | Average CPU utilisation (%) |
-| `Max_Mem_GiB` | Peak RAM usage (GiB) |
-| `CPU_Core_Hours` | CPU core-hours consumed |
+> Tested on: 2× Intel Xeon Gold 6430 (64 cores, 128 threads)
 
 ---
 
 ## Citation
 
-If you use SIS-LLM in your research, please cite:
-
 ```bibtex
 @inproceedings{asgher2025sis,
-  title     = {SIS: A Sustainability Index for Evaluating Energy-Efficient LLM
-               Inference Across CPU and GPU Deployments},
-  author    = {Asgher, Urooj and Malik, Tania},
-  booktitle = {Proceedings of ...},
-  year      = {2025},
+  title  = {SIS: A Sustainability Index for Evaluating Energy-Efficient LLM
+            Inference Across CPU and GPU Deployments},
+  author = {Asgher, Urooj and Malik, Tania},
+  year   = {2025},
   institution = {Technological University Dublin, Ireland}
 }
 ```
@@ -358,8 +144,7 @@ If you use SIS-LLM in your research, please cite:
 
 ## Acknowledgements
 
-This research was conducted at Technological University Dublin, Ireland.
-Experiments were carried out using the HPCNexus testbed hosted by the HPC Nexus Laboratory at Technological University Dublin.
+Experiments were carried out using the HPCNexus testbed at Technological University Dublin.
 
 ---
 
